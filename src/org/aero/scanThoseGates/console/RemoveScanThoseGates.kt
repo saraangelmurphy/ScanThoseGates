@@ -56,6 +56,7 @@ class RemoveScanThoseGates : BaseCommand {
 
         Global.getSector().memoryWithoutUpdate.unset(ModPlugin.ALLOW_CRYOSLEEPER_SCAN)
         Global.getSector().memoryWithoutUpdate.unset(ModPlugin.ALLOW_HYPERSHUNT_SCAN)
+        Global.getSector().memoryWithoutUpdate.unset(ModPlugin.UNSCANNED_GATES)
 
         return CommandResult.SUCCESS
     }

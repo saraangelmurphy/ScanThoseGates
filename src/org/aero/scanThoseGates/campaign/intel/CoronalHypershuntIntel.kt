@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import org.aero.scanThoseGates.ModPlugin.Settings.INTEL_MEGASTRUCTURES
 import org.aero.scanThoseGates.campaign.intel.button.LayInCourse
+import org.aero.scanThoseGates.misc.Utilities
 
 class CoronalHypershuntIntel(private val hypershunt: SectorEntityToken) : BaseIntel() {
     override fun createIntelInfo(info: TooltipMakerAPI, mode: ListInfoMode) {
@@ -21,7 +22,7 @@ class CoronalHypershuntIntel(private val hypershunt: SectorEntityToken) : BaseIn
             3f
         }
         bullet(info)
-        info.addPara(hypershunt.starSystem.name, initPad, getBulletColorForMode(mode))
+        info.addPara(Utilities.getSystemNameOrHyperspace(hypershunt), initPad, getBulletColorForMode(mode))
         unindent(info)
     }
 
@@ -36,9 +37,9 @@ class CoronalHypershuntIntel(private val hypershunt: SectorEntityToken) : BaseIn
         text.addPara(desc.text1FirstPara, Misc.getGrayColor(), opad)
         info.addImageWithText(opad)
         info.addPara(
-            "Located in the ${hypershunt.starSystem.nameWithLowercaseType}.", opad,
+            "Located in ${Utilities.getSystemNameOrHyperspace(hypershunt)}.", opad,
             Misc.getPositiveHighlightColor(),
-            hypershunt.starSystem.baseName)
+            hypershunt.starSystem?.baseName ?: "Hyperspace")
         addGenericButton(info, width, LayInCourse(hypershunt))
     }
 

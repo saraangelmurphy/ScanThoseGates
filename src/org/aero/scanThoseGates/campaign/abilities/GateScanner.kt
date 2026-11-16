@@ -40,10 +40,10 @@ class GateScanner : BaseDurationAbility() {
             var gateIntelString = "null"
             for (gate in Global.getSector().getCustomEntitiesWithTag(Tags.GATE)) {
                 val gateScanStatus = gate.memoryWithoutUpdate.getBoolean(GateEntityPlugin.GATE_SCANNED)
-                var revealThatGate = false
+                var revealThatGate = gateScanStatus
                 try {
                     if (gate.containingLocation in systemsWithMarkets && !gateScanStatus || activateAllGates && !gateScanStatus) {
-                        gate.memory[GateEntityPlugin.GATE_SCANNED] = true
+                        gate.memoryWithoutUpdate[GateEntityPlugin.GATE_SCANNED] = true
                         GateCMD.notifyScanned(gate)
                         gateStatusString = "has been activated"
                         revealThatGate = true
@@ -104,7 +104,7 @@ class GateScanner : BaseDurationAbility() {
     }
 
     override fun isUsable(): Boolean {
-        return (Global.getSector().memoryWithoutUpdate.getBoolean(GateEntityPlugin.CAN_SCAN_GATES)
+        return (super.isUsable() && Global.getSector().memoryWithoutUpdate.getBoolean(GateEntityPlugin.CAN_SCAN_GATES)
                 && Global.getSector().memoryWithoutUpdate.getBoolean(GateEntityPlugin.GATES_ACTIVE)
                 && Global.getSector().memoryWithoutUpdate.getBoolean(UNSCANNED_GATES))
     }
@@ -160,6 +160,7 @@ class GateScanner : BaseDurationAbility() {
     }
 
     private fun generateMarketSystemsHashset() {
+        systemsWithMarkets.clear()
         for (system in Global.getSector().economy.starSystemsWithMarkets) {
             if (system !in systemsWithMarkets) {
                 for (market in Global.getSector().economy.getMarkets(system)) {
@@ -174,7 +175,12 @@ class GateScanner : BaseDurationAbility() {
 
     private fun checkForGates() {
         generateMarketSystemsHashset()
+        Global.getSector().memoryWithoutUpdate[UNSCANNED_GATES] = false
         for (gate in Global.getSector().getCustomEntitiesWithTag(Tags.GATE)) {
+            if (gate.memoryWithoutUpdate.getBoolean(GateEntityPlugin.GATE_SCANNED) && gateIntelDoesNotExist(gate)) {
+                Global.getSector().memoryWithoutUpdate[UNSCANNED_GATES] = true
+                return
+            }
             if (!gate.memoryWithoutUpdate.getBoolean(GateEntityPlugin.GATE_SCANNED)) {
                 if (activateAllGates) {
                     Global.getSector().memoryWithoutUpdate[UNSCANNED_GATES] = true

@@ -9,7 +9,8 @@ import org.aero.scanThoseGates.campaign.abilities.HypershuntScanner.Companion.tr
 import org.apache.log4j.Level
 
 class RelocationListener : CurrentLocationChangedListener {
-    override fun reportCurrentLocationChanged(previous: LocationAPI, current: LocationAPI) {
+    override fun reportCurrentLocationChanged(previous: LocationAPI?, current: LocationAPI?) {
+        if (current == null) return
         for (cryo in current.getEntitiesWithTag(Tags.CRYOSLEEPER)) {
             tryCreateCryosleeperReportCustom(cryo!!, log, true, true)
         }

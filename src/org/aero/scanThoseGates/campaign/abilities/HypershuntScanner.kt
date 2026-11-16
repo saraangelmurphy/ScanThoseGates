@@ -26,7 +26,7 @@ class HypershuntScanner : BaseDurationAbility() {
     }
 
     override fun isUsable(): Boolean {
-        return Global.getSector().memoryWithoutUpdate.getBoolean(ALLOW_HYPERSHUNT_SCAN)
+        return super.isUsable() && Global.getSector().memoryWithoutUpdate.getBoolean(ALLOW_HYPERSHUNT_SCAN)
     }
     override fun hasTooltip(): Boolean {
         return true

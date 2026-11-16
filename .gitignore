@@ -7,6 +7,8 @@
 
 # IntelliJ
 out/
+build/
+dist/
 /.run/
 /*.iml
 

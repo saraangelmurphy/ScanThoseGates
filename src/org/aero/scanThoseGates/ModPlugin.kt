@@ -51,8 +51,18 @@ class ModPlugin : BaseModPlugin() {
             revealAllGates = getBoolean("RevealInactiveGates")
             activateAllGates = getBoolean("ActivateInactiveGates")
 
-            usableCheckInterval = getFloat("GateScanUsableCheckInterval", 1f)
-            usableCheckReportInterval = getFloat("GateScanDiagnosticsInterval", 60f)
+            usableCheckInterval = getFloat("GateScanUsableCheckInterval", 1f).let { if (it.isFinite() && it > 0) it else 1f }
+            usableCheckReportInterval = getFloat("GateScanDiagnosticsInterval", 60f).let { if (it.isFinite() && it > 0) it else 60f }
+        }
+
+        fun isLunaVersionSupported(version: String): Boolean {
+            val parts = Regex("^(\\d+)\\.(\\d+)(?:\\.(\\d+))?").find(version)?.groupValues ?: return false
+            val installed = parts.drop(1).map { it.toIntOrNull() ?: 0 }
+            val required = listOf(LUNA_MAJOR, LUNA_MINOR, LUNA_PATCH)
+            for (i in required.indices) {
+                if (installed[i] != required[i]) return installed[i] > required[i]
+            }
+            return true
         }
     }
 
@@ -81,6 +91,8 @@ class ModPlugin : BaseModPlugin() {
             characterData.addAbility(CRYOSLEEPER_SCAN_ABILITY)
         }
 
+        Global.getSector().listenerManager.removeListenerOfClass(RelocationListener::class.java)
+        Global.getSector().listenerManager.removeListenerOfClass(SalvagingListener::class.java)
         Global.getSector().listenerManager.addListener(RelocationListener(), true)
         Global.getSector().listenerManager.addListener(SalvagingListener(), true)
 
@@ -88,6 +100,8 @@ class ModPlugin : BaseModPlugin() {
 
         GateScanner.secondsSinceLastCheck = usableCheckInterval
         GateScanner.secondsSinceLastReport = usableCheckReportInterval
+        GateScanner.systemsWithMarkets.clear()
+        GateScanner.gateScanPrimed = false
     }
 
     override fun onApplicationLoad() {
@@ -105,22 +119,7 @@ class ModPlugin : BaseModPlugin() {
     private fun requiredLunaLibVersionPresent(): Boolean {
         val version = Global.getSettings().modManager.getModSpec(LUNALIB_ID).version
         log.info("LunaLib Version: $version")
-        val splitVersion = version.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-            .split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-
-        val installedMajor = splitVersion[0].toInt()
-        val installedMinor = splitVersion[1].toInt()
-        val installedPatch = splitVersion[2].toInt()
-
-        if (installedMajor > LUNA_MAJOR) {
-            return true
-        } else if (installedMajor < LUNA_MAJOR) {
-            return false
-        }
-        if (installedMinor > LUNA_MINOR) {
-            return true
-        }
-        return (installedMinor >= LUNA_MINOR && installedPatch >= LUNA_PATCH)
+        return isLunaVersionSupported(version)
     }
 
 }

@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import org.aero.scanThoseGates.ModPlugin.Settings.INTEL_MEGASTRUCTURES
 import org.aero.scanThoseGates.campaign.intel.button.LayInCourse
+import org.aero.scanThoseGates.misc.Utilities
 
 class CryosleeperIntel(private val cryosleeper: SectorEntityToken) : BaseIntel() {
     override fun createIntelInfo(info: TooltipMakerAPI, mode: ListInfoMode) {
@@ -21,7 +22,7 @@ class CryosleeperIntel(private val cryosleeper: SectorEntityToken) : BaseIntel()
             3f
         }
         bullet(info)
-        info.addPara(cryosleeper.starSystem.name, initPad, getBulletColorForMode(mode))
+        info.addPara(Utilities.getSystemNameOrHyperspace(cryosleeper), initPad, getBulletColorForMode(mode))
         unindent(info)
     }
 
@@ -36,9 +37,9 @@ class CryosleeperIntel(private val cryosleeper: SectorEntityToken) : BaseIntel()
         text.addPara(desc.text1FirstPara, Misc.getGrayColor(), opad)
         info.addImageWithText(opad)
         info.addPara(
-            "Located in the ${cryosleeper.starSystem.nameWithLowercaseType}.", opad,
+            "Located in ${Utilities.getSystemNameOrHyperspace(cryosleeper)}.", opad,
             Misc.getPositiveHighlightColor(),
-            cryosleeper.starSystem.baseName)
+            cryosleeper.starSystem?.baseName ?: "Hyperspace")
         addGenericButton(info, width, LayInCourse(cryosleeper))
     }
 
